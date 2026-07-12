@@ -28,9 +28,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/nitishkp001/docwarden"
-Repository = "https://github.com/nitishkp001/docwarden"
-"Bug Tracker" = "https://github.com/nitishkp001/docwarden/issues"
+Homepage = "https://github.com/nitishkp001/docswarden"
+Repository = "https://github.com/nitishkp001/docswarden"
+"Bug Tracker" = "https://github.com/nitishkp001/docswarden/issues"
 
 [project.scripts]
 docswarden = "docwarden.cli:main"
