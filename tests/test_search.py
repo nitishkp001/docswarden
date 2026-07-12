@@ -52,11 +52,28 @@ def test_search_result_contains_indexed_at(indexed_db):
 
 
 def test_search_framework_filter(indexed_db):
-    # fastapi should find results, react should not
+    # fastapi should find results, react should not (no react docs indexed)
     results_fa = _search_docs(indexed_db, "path parameter", framework="fastapi")
     results_re = _search_docs(indexed_db, "path parameter", framework="react")
     assert results_fa[0].text != "No results found for that query."
-    assert "No results" in results_re[0].text
+    assert "react" in results_re[0].text.lower()
+    assert "docswarden index react" in results_re[0].text
+
+
+def test_search_no_docs_indexed_at_all_hints_index_command(db):
+    results = _search_docs(db, "anything")
+    assert "docswarden index" in results[0].text
+
+
+def test_search_no_docs_for_framework_hints_index_command(indexed_db):
+    results = _search_docs(indexed_db, "path parameter", framework="nextjs")
+    assert "docswarden index nextjs" in results[0].text
+
+
+def test_search_no_results_for_indexed_framework_is_generic(indexed_db):
+    # fastapi IS indexed, but the query matches nothing — should be the plain message
+    results = _search_docs(indexed_db, "zzzznonexistentqueryzzzz", framework="fastapi")
+    assert results[0].text == "No results found for that query."
 
 
 def test_search_limit_respected(indexed_db):

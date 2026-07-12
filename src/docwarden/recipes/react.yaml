@@ -3,8 +3,8 @@ name: React
 homepage: https://react.dev
 
 source:
-  type: sitemap
-  url: https://react.dev/sitemap.xml
+  type: crawl
+  url: https://react.dev/reference/react
   include:
     - "/learn/**"
     - "/reference/**"

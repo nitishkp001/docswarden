@@ -130,7 +130,7 @@ def _search_docs(
         ).fetchall()
 
     if not rows:
-        return [TextContent(type="text", text="No results found for that query.")]
+        return [TextContent(type="text", text=_empty_result_hint(conn, framework))]
 
     results = []
     for r in rows:
@@ -190,6 +190,27 @@ def _get_section(conn: sqlite3.Connection, url: str, section_title: str) -> list
             text=f"**{chunk['breadcrumb']}**\nSource: {url}{anchor}\n\n{chunk['content']}",
         )
     ]
+
+
+def _empty_result_hint(conn: sqlite3.Connection, framework: str | None) -> str:
+    if framework:
+        count = conn.execute(
+            "SELECT COUNT(*) AS n FROM pages WHERE framework = ?", (framework,)
+        ).fetchone()["n"]
+        if count == 0:
+            return (
+                f"No docs indexed yet for '{framework}'. "
+                f"Run `docswarden index {framework}` to crawl it, then search again."
+            )
+    else:
+        count = conn.execute("SELECT COUNT(*) AS n FROM pages").fetchone()["n"]
+        if count == 0:
+            return (
+                "No docs indexed yet. Run `docswarden index <framework>` "
+                "(e.g. `docswarden index fastapi react nextjs`) to crawl and index docs, "
+                "then search again."
+            )
+    return "No results found for that query."
 
 
 def _human_age(iso: str) -> str:

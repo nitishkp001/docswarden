@@ -13,9 +13,10 @@ import httpx
 
 from .recipes import Recipe
 
-_USER_AGENT = "docwarden/0.1 (+https://github.com/nitish/docwarden; docs indexer)"
+_USER_AGENT = "docwarden/0.1 (+https://github.com/nitishkp001/docswarden; docs indexer)"
 _CONCURRENCY = 5
 _RATE_DELAY = 0.2  # seconds between requests per host
+_MAX_CRAWL_PAGES = 1000  # safety cap for BFS crawl (no sitemap to bound the count)
 
 
 async def _fetch(client: httpx.AsyncClient, url: str) -> str | None:
@@ -78,6 +79,22 @@ def _is_disallowed(path: str, disallowed: set[str]) -> bool:
     return any(path.startswith(d) for d in disallowed)
 
 
+def _enqueue_new_links(base_url: str, html: str, seen: set[str], queue: list[str]) -> None:
+    """Discover relative links in `html` and queue ones not already in `seen`.
+
+    Marks newly-discovered URLs as seen immediately (not just once fetched), so a
+    URL linked from many pages is only ever queued once instead of once per referrer.
+    """
+    from urllib.parse import urljoin
+
+    base = base_url.rstrip("/")
+    for href in re.findall(r'href="(/[^"#?]+)"', html):
+        linked = urljoin(base, href)
+        if linked not in seen:
+            seen.add(linked)
+            queue.append(linked)
+
+
 async def crawl_recipe(recipe: Recipe) -> list[tuple[str, str]]:
     """Return list of (url, html) for all pages matching the recipe."""
     headers = {"User-Agent": _USER_AGENT}
@@ -123,19 +140,15 @@ async def _crawl_sitemap(client: httpx.AsyncClient, recipe: Recipe) -> list[tupl
 async def _crawl_site(client: httpx.AsyncClient, recipe: Recipe) -> list[tuple[str, str]]:
     # Basic BFS crawl — used when no sitemap is available.
     assert recipe.source.url
-    from urllib.parse import urljoin
 
-    visited: set[str] = set()
+    seen: set[str] = {recipe.source.url}  # enqueued-or-visited, prevents queue duplicates
     queue = [recipe.source.url]
     results: list[tuple[str, str]] = []
     disallowed = await _check_robots(client, recipe.source.url)
 
-    while queue:
+    while queue and len(results) < _MAX_CRAWL_PAGES:
         batch, queue = queue[:_CONCURRENCY], queue[_CONCURRENCY:]
         for url in batch:
-            if url in visited:
-                continue
-            visited.add(url)
             path = urlparse(url).path
             if _is_disallowed(path, disallowed):
                 continue
@@ -146,11 +159,13 @@ async def _crawl_site(client: httpx.AsyncClient, recipe: Recipe) -> list[tuple[s
             html = await _fetch(client, url)
             if html:
                 results.append((url, html))
-                # discover internal links (minimal)
-                new = re.findall(r'href="(/[^"#?]+)"', html)
-                base = recipe.source.url.rstrip("/")
-                queue.extend(urljoin(base, p) for p in new if urljoin(base, p) not in visited)
+                _enqueue_new_links(recipe.source.url, html, seen, queue)
+        if len(results) % 20 < _CONCURRENCY:
+            print(f"  Crawled {len(results)} pages so far ({len(queue)} queued)...")
         await asyncio.sleep(_RATE_DELAY)
+
+    if len(results) >= _MAX_CRAWL_PAGES:
+        print(f"  Hit crawl cap of {_MAX_CRAWL_PAGES} pages; stopping.")
 
     return results
 
