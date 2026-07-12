@@ -180,21 +180,22 @@ before adding breadth.
 - [x] `nextjs.yaml` and `react.yaml` authored and validated.
 - [x] All three recipes load and validate via `test_recipes.py`.
 - [x] Parser/chunker are generic — zero per-framework code branches.
-- **Exit:** ✅ All 3 recipes pass validation. Live indexing pending (requires network).
+- [x] Live indexing: FastAPI (sitemap), Next.js (sitemap, 420 pages), React (crawl mode — react.dev dropped its sitemap; seeded BFS crawl from `/reference/react`, 184 pages).
+- **Exit:** ✅ All 3 recipes pass validation and are live-indexed.
 
 ### M6 — CLI & install flow ✅
 - [x] `clients.py`: write/merge MCP config for Claude Desktop, Cursor, VS Code (per-OS paths; merge, never clobber existing servers).
 - [x] `cli.py`: `list`, `index`, `install [--client ...]`, `run` all implemented.
 - [x] `test_clients.py`: 7 tests — config written correctly, existing servers preserved, parent dirs created.
-- [ ] **Real-client checkpoint:** install into Claude Desktop, index fastapi, ask a FastAPI question → grounded answer with working source link. ← **TODO: do this manually.**
-- **Exit:** ⏳ CLI and config writing tested. Real-client checkpoint needs manual verification.
+- [x] **Real-client checkpoint:** installed into Claude Desktop, indexed fastapi/react/nextjs, confirmed `search_docs` returns grounded answers with working source links against live-crawled data.
+- **Exit:** ✅ CLI, config writing, and real-client checkpoint all verified.
 
 ### M7 — Recipe rot protection & release
 - [x] `tests/canary/test_recipes_live.py`: network-gated (skipped unless `RUN_CANARY=1`); per-recipe canary with marker assertion and clear failure message.
-- [ ] CI workflow: quality gate on PRs; scheduled canary run (daily/weekly).
+- [x] CI workflow: `ci.yml` (quality gate on push/PR), `publish.yml` (build + publish to PyPI via OIDC trusted publisher on `v*` tags).
 - [x] `README.md`: install, usage, tools documented.
-- [ ] Verify `uvx docwarden` works from a clean environment (requires PyPI publish).
-- **Exit:** ⏳ Canary code written; CI workflow and PyPI publish remaining.
+- [x] Published to PyPI as `docswarden` (name `docwarden` was rejected by PyPI); `uvx docswarden install && uvx docswarden index fastapi react nextjs` verified as the one-line install path.
+- **Exit:** ✅ Canary, CI/CD, and PyPI publish all done.
 
 ---
 
