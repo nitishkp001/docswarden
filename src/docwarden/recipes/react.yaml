@@ -1,0 +1,19 @@
+id: react
+name: React
+homepage: https://react.dev
+
+source:
+  type: sitemap
+  url: https://react.dev/sitemap.xml
+  include:
+    - "/learn/**"
+    - "/reference/**"
+  exclude: []
+
+parser:
+  content_selector: "article"
+  code_selector: "pre code"
+
+canary:
+  url: "https://react.dev/reference/react/useState"
+  marker: "Returns"

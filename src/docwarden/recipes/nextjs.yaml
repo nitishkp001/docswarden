@@ -1,0 +1,19 @@
+id: nextjs
+name: Next.js
+homepage: https://nextjs.org/docs
+
+source:
+  type: sitemap
+  url: https://nextjs.org/sitemap.xml
+  include:
+    - "/docs/**"
+  exclude:
+    - "/docs/messages/**"
+
+parser:
+  content_selector: "article"
+  code_selector: "pre code"
+
+canary:
+  url: "https://nextjs.org/docs/app/building-your-application/routing"
+  marker: "routing"

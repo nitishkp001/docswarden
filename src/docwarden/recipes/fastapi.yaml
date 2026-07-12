@@ -1,0 +1,48 @@
+id: fastapi
+name: FastAPI
+homepage: https://fastapi.tiangolo.com
+
+source:
+  type: sitemap
+  url: https://fastapi.tiangolo.com/sitemap.xml
+  include:
+    - "/tutorial/**"
+    - "/advanced/**"
+    - "/reference/**"
+    - "/"
+  exclude:
+    - "/az/**"
+    - "/em/**"
+    - "/de/**"
+    - "/es/**"
+    - "/fa/**"
+    - "/fr/**"
+    - "/he/**"
+    - "/hu/**"
+    - "/hy/**"
+    - "/id/**"
+    - "/it/**"
+    - "/ja/**"
+    - "/ko/**"
+    - "/nl/**"
+    - "/pl/**"
+    - "/pt/**"
+    - "/ru/**"
+    - "/sq/**"
+    - "/sv/**"
+    - "/ta/**"
+    - "/tr/**"
+    - "/uk/**"
+    - "/ur/**"
+    - "/vi/**"
+    - "/yo/**"
+    - "/zh/**"
+    - "/zh-hant/**"
+
+parser:
+  content_selector: "article"
+  code_selector: "pre code"
+
+canary:
+  url: "https://fastapi.tiangolo.com/tutorial/path-params/"
+  marker: "path parameters"
